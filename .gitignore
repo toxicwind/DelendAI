@@ -148,3 +148,4 @@ delendai-session-*.md
 *.sqlite.staging
 *.sqlite.staging-wal
 *.sqlite.staging-shm
+.ffs/
