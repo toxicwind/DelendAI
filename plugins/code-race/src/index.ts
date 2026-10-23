@@ -10,8 +10,7 @@ import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 const BUDGET_MS = 4000;
-const DEFAULT_FORGE =
-	'/home/toxic/estate/grasp-hub/skills/04_code_intelligence/code-patterns/src/cli.ts';
+const DEFAULT_FORGE = '/home/toxic/pens/barn/forge/bin/forge.ts'; // pattern-forge (has `borrow`+`race`), canonical barn product bundle
 export const FORGE = process.env.DELEND_CODERACE_FORGE || DEFAULT_FORGE;
 const WINNER_PATH =
 	process.env.DELEND_CODERACE_WINNER || '/tmp/delend-code-race-winner.json';
@@ -90,7 +89,12 @@ export async function raceCore(
 	const parts = argvOf(cmdLine);
 	const exe = parts.shift() ?? '';
 
-	const orig = run(exe, parts, cwd, budget);
+	// Run the original through the shell so quoting/globs/pipelines survive the
+	// breach hand-off from kairos (argvOf tokenization destroys multi-line `-e`
+	// programs and nested quotes, producing a phantom rc!=0 that poisons the race).
+	const orig = cmdLine.trim()
+		? run('bash', ['-c', cmdLine], cwd, budget)
+		: run(exe, parts, cwd, budget);
 	if (!orig.timedOut && orig.status === 0) {
 		const detail = `original completed under ${budget}ms budget (rc=0). No race needed.`;
 		done('PASS flaky', detail);
