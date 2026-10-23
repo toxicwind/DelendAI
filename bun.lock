@@ -477,6 +477,17 @@
         "vitest": "^4.1.11",
       },
     },
+    "plugins/code-race": {
+      "name": "@delendai/code-race",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
     "plugins/commit-policy": {
       "name": "@delendai/commit-policy",
       "version": "0.1.0",
@@ -509,6 +520,13 @@
         "typescript": "7.0.2",
         "vitest": "4.1.11",
       },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
+    "plugins/consent": {
+      "name": "@delendai/consent",
+      "version": "0.1.0",
       "peerDependencies": {
         "@delendai/core": "^0.1.1",
       },
@@ -701,6 +719,17 @@
         "@delendai/core": "^0.1.1",
       },
     },
+    "plugins/experimental": {
+      "name": "@delendai/experimental",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
     "plugins/external-mcps": {
       "name": "@delendai/external-mcps",
       "version": "0.1.1",
@@ -729,6 +758,17 @@
         "@types/bun": "latest",
         "typescript": "7.0.2",
         "vitest": "4.1.11",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
+    "plugins/forge-audit": {
+      "name": "@delendai/forge-audit",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
       },
       "peerDependencies": {
         "@delendai/core": "^0.1.1",
@@ -805,6 +845,17 @@
         "@delendai/core": "^0.1.1",
       },
     },
+    "plugins/global-gh": {
+      "name": "@delendai/global-gh",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
     "plugins/i18n": {
       "name": "@delendai/i18n",
       "version": "0.1.1",
@@ -847,6 +898,17 @@
         "@delendai/core": "^0.1.1",
       },
     },
+    "plugins/intent-router": {
+      "name": "@delendai/intent-router",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
     "plugins/issues": {
       "name": "@delendai/issues",
       "version": "0.1.1",
@@ -881,6 +943,17 @@
       "peerDependencies": {
         "@delendai/core": "^0.1.1",
         "@delendai/proposals": "^0.1.1",
+      },
+    },
+    "plugins/iterate": {
+      "name": "@delendai/iterate",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
       },
     },
     "plugins/link-check": {
@@ -935,6 +1008,17 @@
         "@delendai/core": "^0.1.1",
       },
     },
+    "plugins/model-race": {
+      "name": "@delendai/model-race",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
     "plugins/notification": {
       "name": "@delendai/notification",
       "version": "0.1.1",
@@ -965,6 +1049,17 @@
       "peerDependencies": {
         "@delendai/core": "^0.1.1",
         "@delendai/web-fetch": "workspace:*",
+      },
+    },
+    "plugins/oracle-market": {
+      "name": "@delendai/oracle-market",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
       },
     },
     "plugins/orchestrator-runner": {
@@ -1183,6 +1278,17 @@
         "@delendai/core": "^0.1.1",
       },
     },
+    "plugins/rig-c2": {
+      "name": "@delendai/rig-c2",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
     "plugins/rules": {
       "name": "@delendai/rules",
       "version": "0.1.1",
@@ -1369,6 +1475,17 @@
         "@types/bun": "latest",
         "typescript": "7.0.2",
         "vitest": "4.1.11",
+      },
+      "peerDependencies": {
+        "@delendai/core": "^0.1.1",
+      },
+    },
+    "plugins/work-refs": {
+      "name": "@delendai/work-refs",
+      "version": "0.1.0",
+      "dependencies": {
+        "@delendai/consent": "workspace:*",
+        "zod": "^4.4.3",
       },
       "peerDependencies": {
         "@delendai/core": "^0.1.1",
@@ -1623,9 +1740,13 @@
 
     "@delendai/client": ["@delendai/client@workspace:packages/client"],
 
+    "@delendai/code-race": ["@delendai/code-race@workspace:plugins/code-race"],
+
     "@delendai/commit-policy": ["@delendai/commit-policy@workspace:plugins/commit-policy"],
 
     "@delendai/completion": ["@delendai/completion@workspace:plugins/completion"],
+
+    "@delendai/consent": ["@delendai/consent@workspace:plugins/consent"],
 
     "@delendai/container": ["@delendai/container@workspace:plugins/container"],
 
@@ -1657,9 +1778,13 @@
 
     "@delendai/execution-env": ["@delendai/execution-env@workspace:plugins/execution-env"],
 
+    "@delendai/experimental": ["@delendai/experimental@workspace:plugins/experimental"],
+
     "@delendai/external-mcps": ["@delendai/external-mcps@workspace:plugins/external-mcps"],
 
     "@delendai/forge": ["@delendai/forge@workspace:plugins/forge"],
+
+    "@delendai/forge-audit": ["@delendai/forge-audit@workspace:plugins/forge-audit"],
 
     "@delendai/framework-knowledge": ["@delendai/framework-knowledge@workspace:plugins/framework-knowledge"],
 
@@ -1669,13 +1794,19 @@
 
     "@delendai/gitlab": ["@delendai/gitlab@workspace:plugins/gitlab"],
 
+    "@delendai/global-gh": ["@delendai/global-gh@workspace:plugins/global-gh"],
+
     "@delendai/i18n": ["@delendai/i18n@workspace:plugins/i18n"],
 
     "@delendai/impact-analysis": ["@delendai/impact-analysis@workspace:plugins/impact-analysis"],
 
+    "@delendai/intent-router": ["@delendai/intent-router@workspace:plugins/intent-router"],
+
     "@delendai/issues": ["@delendai/issues@workspace:plugins/issues"],
 
     "@delendai/issues-triage": ["@delendai/issues-triage@workspace:plugins/issues-triage"],
+
+    "@delendai/iterate": ["@delendai/iterate@workspace:plugins/iterate"],
 
     "@delendai/link-check": ["@delendai/link-check@workspace:plugins/link-check"],
 
@@ -1683,9 +1814,13 @@
 
     "@delendai/memory": ["@delendai/memory@workspace:plugins/memory"],
 
+    "@delendai/model-race": ["@delendai/model-race@workspace:plugins/model-race"],
+
     "@delendai/notification": ["@delendai/notification@workspace:plugins/notification"],
 
     "@delendai/observability": ["@delendai/observability@workspace:plugins/observability"],
+
+    "@delendai/oracle-market": ["@delendai/oracle-market@workspace:plugins/oracle-market"],
 
     "@delendai/orchestrator-runner": ["@delendai/orchestrator-runner@workspace:plugins/orchestrator-runner"],
 
@@ -1710,6 +1845,8 @@
     "@delendai/refactor": ["@delendai/refactor@workspace:plugins/refactor"],
 
     "@delendai/remote-provider-core": ["@delendai/remote-provider-core@workspace:plugins/remote-provider-core"],
+
+    "@delendai/rig-c2": ["@delendai/rig-c2@workspace:plugins/rig-c2"],
 
     "@delendai/roadmap": ["@delendai/roadmap@workspace:packages/roadmap"],
 
@@ -1750,6 +1887,8 @@
     "@delendai/web": ["@delendai/web@workspace:apps/web"],
 
     "@delendai/web-fetch": ["@delendai/web-fetch@workspace:plugins/web-fetch"],
+
+    "@delendai/work-refs": ["@delendai/work-refs@workspace:plugins/work-refs"],
 
     "@emmetio/abbreviation": ["@emmetio/abbreviation@2.3.3", "", { "dependencies": { "@emmetio/scanner": "^1.0.4" } }, "sha512-mgv58UrU3rh4YgbE/TzgLQwJ3pFsHHhCLqY20aJq+9comytTXUDNGG/SMtSeMJdkpxgXSXunBGLD8Boka3JyVA=="],
 

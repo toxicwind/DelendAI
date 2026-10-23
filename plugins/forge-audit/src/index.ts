@@ -5,11 +5,10 @@
  * and importable Bun library.
  */
 import { readFileSync, existsSync } from 'node:fs';
-import { join, dirname, resolve } from 'node:path';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
-const here = dirname(new URL(import.meta.url).pathname);
 export const FORGE =
 	process.env.DELEND_AUDIT_FORGE ||
 	'/home/toxic/estate/grasp-hub/skills/04_code_intelligence/code-patterns/src/cli.ts';
@@ -165,7 +164,7 @@ export default definePlugin({
 		const prefix = ctx.namespacePrefix || 'forge_audit';
 		const wsRoot = ctx.workspace?.root || process.cwd();
 		return {
-			tools: [
+			tools: consentTools('forge-audit', [
 				{
 					id: 'audit',
 					summary:
@@ -213,7 +212,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

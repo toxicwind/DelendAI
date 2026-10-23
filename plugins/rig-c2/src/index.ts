@@ -15,6 +15,7 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 const ORACLE = '/home/toxic/estate/ranch/squawk/oracle';
@@ -237,7 +238,7 @@ export default definePlugin({
 	register(ctx) {
 		const prefix = ctx.namespacePrefix || 'rig_c2';
 		return {
-			tools: [
+			tools: consentTools('rig-c2', [
 				{
 					id: 'diagnose',
 					summary:
@@ -299,7 +300,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

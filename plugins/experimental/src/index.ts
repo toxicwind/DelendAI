@@ -6,6 +6,7 @@
  */
 import { existsSync } from 'node:fs';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 const DEFAULT_FORGE =
@@ -199,7 +200,7 @@ export default definePlugin({
 	register(ctx) {
 		const prefix = ctx.namespacePrefix || 'experimental';
 		return {
-			tools: [
+			tools: consentTools('experimental', [
 				{
 					id: 'conjecture',
 					summary:
@@ -212,6 +213,12 @@ export default definePlugin({
 								description:
 									'Run delend-experimental on an emergent brief.',
 								inputSchema: z.object({
+									confirm: z
+										.boolean()
+										.optional()
+										.describe(
+											'Explicit I5 consent: required for write/spend tools unless the session opted in via --yes-i-take-responsibility-for-spend',
+										),
 									brief: z.string(),
 									paths: z
 										.number()
@@ -272,7 +279,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

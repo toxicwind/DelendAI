@@ -6,6 +6,7 @@
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 export const PROVIDERS: Record<string, { base: string; key: string }> = {
@@ -385,7 +386,7 @@ export default definePlugin({
 	register(ctx) {
 		const prefix = ctx.namespacePrefix || 'model_race';
 		return {
-			tools: [
+			tools: consentTools('model-race', [
 				{
 					id: 'run',
 					summary:
@@ -398,6 +399,12 @@ export default definePlugin({
 								description:
 									'Run delend-model-race for a provider/profile.',
 								inputSchema: z.object({
+									confirm: z
+										.boolean()
+										.optional()
+										.describe(
+											'Explicit I5 consent: required for write/spend tools unless the session opted in via --yes-i-take-responsibility-for-spend',
+										),
 									provider: z.string().optional(),
 									profile: z.string().optional(),
 									models: z.array(z.string()).optional(),
@@ -448,7 +455,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

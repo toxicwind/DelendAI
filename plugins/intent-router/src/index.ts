@@ -5,6 +5,7 @@
  * and importable Bun library.
  */
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 const BIN = '/home/toxic/estate/bin';
@@ -268,7 +269,7 @@ export default definePlugin({
 	register(ctx) {
 		const prefix = ctx.namespacePrefix || 'intent';
 		return {
-			tools: [
+			tools: consentTools('intent-router', [
 				{
 					id: 'classify',
 					summary:
@@ -352,6 +353,12 @@ export default definePlugin({
 								description:
 									'Classify and execute the routed primitive on an instruction.',
 								inputSchema: z.object({
+									confirm: z
+										.boolean()
+										.optional()
+										.describe(
+											'Explicit I5 consent: required for write/spend tools unless the session opted in via --yes-i-take-responsibility-for-spend',
+										),
 									instruction: z.string(),
 								}),
 							},
@@ -380,7 +387,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

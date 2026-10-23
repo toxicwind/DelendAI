@@ -9,6 +9,7 @@ import { existsSync, statSync } from 'node:fs';
 import { resolve, dirname, join, relative } from 'node:path';
 import { homedir } from 'node:os';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 export interface ExecResult {
@@ -643,7 +644,7 @@ export default definePlugin({
 		const prefix = ctx.namespacePrefix || 'work_refs';
 		const wsRoot = ctx.workspace?.root || process.cwd();
 		return {
-			tools: [
+			tools: consentTools('work-refs', [
 				{
 					id: 'quick_checkpoint',
 					summary:
@@ -656,6 +657,12 @@ export default definePlugin({
 								description:
 									'Run delend-quick checkpoint on staged or explicit paths in a workspace.',
 								inputSchema: z.object({
+									confirm: z
+										.boolean()
+										.optional()
+										.describe(
+											'Explicit I5 consent: required for write/spend tools unless the session opted in via --yes-i-take-responsibility-for-spend',
+										),
 									message: z.string(),
 									paths: z.array(z.string()).optional(),
 									proposal: z.string().optional(),
@@ -793,7 +800,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

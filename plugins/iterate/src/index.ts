@@ -4,9 +4,10 @@
  * Converts `estate/bin/delend-iterate` into a first-class DelendAI plugin (`definePlugin`)
  * and importable Bun library.
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 export function get(argv: string[], f: string, d = ''): string {
@@ -22,7 +23,7 @@ export function checkModel(
 		2500,
 	);
 	const t = runp(
-		`[ -n "\$GEMINI_EAP_KEY_1" ] && echo "EAP:\${GEMINI_EAP_KEY_1:0:6}..." || echo no-eap-key`,
+		`[ -n "$GEMINI_EAP_KEY_1" ] && echo "EAP:\${GEMINI_EAP_KEY_1:0:6}..." || echo no-eap-key`,
 		1500,
 	);
 	return (h.out || 'hodos-down') + ' | ' + (t.out || '');
@@ -167,7 +168,7 @@ export default definePlugin({
 	register(ctx) {
 		const prefix = ctx.namespacePrefix || 'iterate';
 		return {
-			tools: [
+			tools: consentTools('iterate', [
 				{
 					id: 'run',
 					summary:
@@ -180,6 +181,12 @@ export default definePlugin({
 								description:
 									'Run delend-iterate on a goal/workdir.',
 								inputSchema: z.object({
+									confirm: z
+										.boolean()
+										.optional()
+										.describe(
+											'Explicit I5 consent: required for write/spend tools unless the session opted in via --yes-i-take-responsibility-for-spend',
+										),
 									goal: z.string(),
 									workdir: z.string().optional(),
 									iters: z
@@ -242,7 +249,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

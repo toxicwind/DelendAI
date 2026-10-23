@@ -13,6 +13,7 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 export const ORACLE =
@@ -196,7 +197,7 @@ export function readLedger(start = 0): {
 	lastDecision: any | null;
 	lastSettled: any | null;
 } {
-	let events: any[] = [];
+	const events: any[] = [];
 	let offset = start;
 	let lastOpen: any | null = null;
 	let lastAssigned: any | null = null;
@@ -716,7 +717,7 @@ export default definePlugin({
 	register(ctx) {
 		const prefix = ctx.namespacePrefix || 'oracle';
 		return {
-			tools: [
+			tools: consentTools('oracle-market', [
 				{
 					id: 'status',
 					summary:
@@ -755,6 +756,12 @@ export default definePlugin({
 								description:
 									'Run the delend-oracle recursive loop.',
 								inputSchema: z.object({
+									confirm: z
+										.boolean()
+										.optional()
+										.describe(
+											'Explicit I5 consent: required for write/spend tools unless the session opted in via --yes-i-take-responsibility-for-spend',
+										),
 									from: z.string().optional(),
 									iters: z
 										.number()
@@ -812,7 +819,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

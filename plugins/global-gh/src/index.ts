@@ -8,6 +8,7 @@ import { mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 function gitIn(cwd: string, a: string[]) {
@@ -337,7 +338,7 @@ export default definePlugin({
 	register(ctx) {
 		const prefix = ctx.namespacePrefix || 'gh';
 		return {
-			tools: [
+			tools: consentTools('global-gh', [
 				{
 					id: 'run',
 					summary:
@@ -350,6 +351,12 @@ export default definePlugin({
 								description:
 									'Run the global GitHub primitive on a target repo.',
 								inputSchema: z.object({
+									confirm: z
+										.boolean()
+										.optional()
+										.describe(
+											'Explicit I5 consent: required for write/spend tools unless the session opted in via --yes-i-take-responsibility-for-spend',
+										),
 									target: z.string(),
 									mode: z
 										.enum(['audit-main', 'raw', 'git'])
@@ -471,7 +478,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });

@@ -6,6 +6,7 @@
  */
 import { existsSync } from 'node:fs';
 import { definePlugin } from '@delendai/core/plugin';
+import { consentTools } from '@delendai/consent';
 import { z } from 'zod';
 
 const BUDGET_MS = 4000;
@@ -45,7 +46,9 @@ export function argvOf(line: string): string[] {
 	const out: string[] = [];
 	const re = /\s+|"([^"]*)"|'([^']*)'|(\S+)/g;
 	let m: RegExpExecArray | null;
-	while ((m = re.exec(line))) {
+	for (;;) {
+		m = re.exec(line);
+		if (m === null) break;
 		if (m[1] !== undefined) out.push(m[1]);
 		else if (m[2] !== undefined) out.push(m[2]);
 		else if (m[3] !== undefined) out.push(m[3]);
@@ -230,7 +233,7 @@ export default definePlugin({
 		const prefix = ctx.namespacePrefix || 'code_race';
 		const wsRoot = ctx.workspace?.root || process.cwd();
 		return {
-			tools: [
+			tools: consentTools('code-race', [
 				{
 					id: 'run',
 					summary:
@@ -243,6 +246,12 @@ export default definePlugin({
 								description:
 									'Execute delend-code-race on a command line.',
 								inputSchema: z.object({
+									confirm: z
+										.boolean()
+										.optional()
+										.describe(
+											'Explicit I5 consent: required for write/spend tools unless the session opted in via --yes-i-take-responsibility-for-spend',
+										),
 									cmdLine: z.string(),
 									budgetMs: z
 										.number()
@@ -285,7 +294,7 @@ export default definePlugin({
 						);
 					},
 				},
-			],
+			]),
 		};
 	},
 });
