@@ -5,12 +5,12 @@
 	"docsDir": "docs/delendai",
 	"agentWorktree": false,
 	"development": {
-		"profile": "shared-checkout-pr",
+		"profile": "shared-checkout-merge",
 		"workRefs": {
 			"visibility": "visible"
 		},
 		"branches": {
-			"integration": "develop",
+			"integration": "main",
 			"release": "main",
 			"namespacePrefix": "delendai"
 		},

@@ -353,6 +353,7 @@
 		"@types/vscode": "^1.125.0",
 		"@vscode/vsce": "^3.9.2",
 		"astro": "^7.1.5",
+		"cookie": "^2.0.1",
 		"simple-icons": "^16.24.0"
 	}
 }

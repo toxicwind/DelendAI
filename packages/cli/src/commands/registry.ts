@@ -58,6 +58,8 @@ import { proposalsCommands } from './groups/proposals';
 import { pluginsCommands } from './groups/plugins';
 import { qualityCommands } from './groups/quality';
 import { routerDashboardCommands } from './groups/router-dashboard';
+// maximal-feature: the self-recreating loop as a command (recurse.ts)
+import recurseCommand from './groups/recurse';
 import { rulesCommands } from './groups/rules';
 import { securityCommands } from './groups/security';
 import { statusMarkerCommands } from './groups/status-marker';
@@ -650,4 +652,5 @@ export const registerAllCommands = async (): Promise<
 	...usageTrackingCommands,
 	...securityCommands,
 	...routerDashboardCommands,
+	recurseCommand,
 ];
