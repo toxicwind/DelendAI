@@ -1,0 +1,30 @@
+{
+	"name": "@delendai/rig-c2",
+	"version": "0.1.0",
+	"type": "module",
+	"description": "DelendAI forever-loop C2 rig diagnostics plugin (converts delend-rig-c2): ledger settlement stats, workdir status, market-loop symlink fix, loop tick launch.",
+	"license": "BSD-3-Clause",
+	"main": "./src/index.ts",
+	"exports": {
+		".": {
+			"@delendai/source": {
+				"types": "./src/index.ts"
+			},
+			"types": "./src/index.ts",
+			"import": "./src/index.ts"
+		},
+		"./public": {
+			"@delendai/source": {
+				"types": "./src/public/index.ts"
+			},
+			"types": "./src/public/index.ts",
+			"import": "./src/public/index.ts"
+		}
+	},
+	"peerDependencies": {
+		"@delendai/core": "^0.1.1"
+	},
+	"dependencies": {
+		"zod": "^4.4.3"
+	}
+}
