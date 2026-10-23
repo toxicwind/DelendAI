@@ -398,7 +398,57 @@
       }
     },
     "consent": {
-      "path": "/home/toxic/estate/ranch/barn/corral/delendai/plugins/consent/src/index.ts",
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/consent/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "code-race": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/code-race/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "work-refs": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/work-refs/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "global-gh": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/global-gh/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "experimental": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/experimental/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "iterate": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/iterate/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "oracle-market": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/oracle-market/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "model-race": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/model-race/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "intent-router": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/intent-router/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "rig-c2": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/rig-c2/src/index.ts",
+      "enabled": true,
+      "origin": "user-local"
+    },
+    "forge-audit": {
+      "path": "/home/toxic/pens/barn/corral/delendai/plugins/forge-audit/src/index.ts",
       "enabled": true,
       "origin": "user-local"
     }
