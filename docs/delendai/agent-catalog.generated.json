@@ -78,6 +78,10 @@
 			"name": "delendai_cache_reconcile"
 		},
 		{
+			"name": "delendai_code-race_run",
+			"plugin": "code-race"
+		},
+		{
 			"name": "delendai_commit-policy_commit_policy_commit",
 			"plugin": "commit-policy"
 		},
@@ -122,6 +126,10 @@
 		},
 		{
 			"name": "delendai_configuration_center"
+		},
+		{
+			"name": "delendai_consent_consent_overview",
+			"plugin": "consent"
 		},
 		{
 			"name": "delendai_container_container_build",
@@ -273,6 +281,10 @@
 			"plugin": "error-reporting"
 		},
 		{
+			"name": "delendai_experimental_conjecture",
+			"plugin": "experimental"
+		},
+		{
 			"name": "delendai_forge_ci_status",
 			"plugin": "forge"
 		},
@@ -315,6 +327,10 @@
 		{
 			"name": "delendai_forge_search_code",
 			"plugin": "forge"
+		},
+		{
+			"name": "delendai_forge-audit_audit",
+			"plugin": "forge-audit"
 		},
 		{
 			"name": "delendai_fs_read"
@@ -374,6 +390,14 @@
 			"plugin": "git"
 		},
 		{
+			"name": "delendai_global-gh_branch_audit",
+			"plugin": "global-gh"
+		},
+		{
+			"name": "delendai_global-gh_run",
+			"plugin": "global-gh"
+		},
+		{
 			"name": "delendai_i18n_i18n_check",
 			"plugin": "i18n"
 		},
@@ -391,6 +415,22 @@
 		},
 		{
 			"name": "delendai_init_config"
+		},
+		{
+			"name": "delendai_intent-router_classify",
+			"plugin": "intent-router"
+		},
+		{
+			"name": "delendai_intent-router_run",
+			"plugin": "intent-router"
+		},
+		{
+			"name": "delendai_intent-router_where",
+			"plugin": "intent-router"
+		},
+		{
+			"name": "delendai_iterate_run",
+			"plugin": "iterate"
 		},
 		{
 			"name": "delendai_knowledge"
@@ -475,12 +515,24 @@
 			"name": "delendai_metrics"
 		},
 		{
+			"name": "delendai_model-race_run",
+			"plugin": "model-race"
+		},
+		{
 			"name": "delendai_notification_await_lock",
 			"plugin": "notification"
 		},
 		{
 			"name": "delendai_notification_notify_status",
 			"plugin": "notification"
+		},
+		{
+			"name": "delendai_oracle-market_loop",
+			"plugin": "oracle-market"
+		},
+		{
+			"name": "delendai_oracle-market_status",
+			"plugin": "oracle-market"
 		},
 		{
 			"name": "delendai_orchestrator-runner_advise_routing",
@@ -836,6 +888,10 @@
 			"name": "delendai_resolve_capability"
 		},
 		{
+			"name": "delendai_rig-c2_diagnose",
+			"plugin": "rig-c2"
+		},
+		{
 			"name": "delendai_rules_apply_rules",
 			"plugin": "rules"
 		},
@@ -940,6 +996,14 @@
 		},
 		{
 			"name": "delendai_work"
+		},
+		{
+			"name": "delendai_work-refs_dirty_status",
+			"plugin": "work-refs"
+		},
+		{
+			"name": "delendai_work-refs_quick_checkpoint",
+			"plugin": "work-refs"
 		}
 	],
 	"skills": [

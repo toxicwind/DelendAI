@@ -12,6 +12,7 @@
 ## Depends on
 
 - zod
+- @delendai/consent
 - @delendai/core
 
 ## Writes

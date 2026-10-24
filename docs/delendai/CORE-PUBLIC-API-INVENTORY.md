@@ -1,10 +1,10 @@
 # `@delendai/core` public API inventory
 
-Total exports: 423
+Total exports: 433
 
 | Maturity | Count |
 | --- | --- |
-| stable | 420 |
+| stable | 430 |
 | experimental | 0 |
 | internal | 2 |
 | deprecated | 1 |
@@ -36,6 +36,8 @@ Total exports: 423
 | `buildStartupReport` | const | stable | `../lib/startup-report` |
 | `buildStatusToolRegistration` | const | stable | `../lib/tools/status-tool` |
 | `callerCheckout` | const | stable | `../lib/shared/shared-checkout` |
+| `callLlm` | const | stable | `../lib/llm/client` |
+| `callLlmFanOut` | const | stable | `../lib/llm/client` |
 | `CAPABILITY_TAGS` | const | stable | `../lib/contracts/interfaces/provider-capabilities.interface` |
 | `CapabilityTag` | type | stable | `../lib/contracts/interfaces/provider-capabilities.interface` |
 | `CatalogSection` | type | stable | `../lib/catalog/agent-discovery-types` |
@@ -172,6 +174,10 @@ Total exports: 423
 | `IInstallHint` | type | stable | `../contracts` |
 | `IIntegrationEngine` | type | stable | `../lib/integration-engine/index.interface` |
 | `IKnowledgeEntry` | type | stable | `../contracts` |
+| `ILlmCallError` | type | stable | `../lib/llm/client` |
+| `ILlmCallOutcome` | type | stable | `../lib/llm/client` |
+| `ILlmCallRateLimited` | type | stable | `../lib/llm/client` |
+| `ILlmClientOptions` | type | stable | `../lib/llm/client` |
 | `ILocalMergeCycleInput` | type | stable | `../lib/integration-engine/local-merge-cycle.interface` |
 | `ILocalMergeCycleOutcome` | type | stable | `../lib/integration-engine/local-merge-cycle.interface` |
 | `ILocalMergeCycleStatus` | type | stable | `../lib/integration-engine/local-merge-cycle.interface` |
@@ -186,6 +192,7 @@ Total exports: 423
 | `IMemoryEntry` | type | stable | `../lib/memory/utility` |
 | `IMetricsSnapshot` | type | stable | `../lib/metrics/metrics-registry` |
 | `IMigrator` | type | stable | `../lib/migrations/migrate` |
+| `IModelTarget` | type | stable | `../lib/llm/client` |
 | `IPayloadPercentile` | type | stable | `../lib/metrics/payload-percentile` |
 | `IPeerPluginRegistry` | type | stable | `../lib/plugins/plugin-contract` |
 | `IPhasedLifecycle` | type | stable | `../contracts` |
@@ -287,6 +294,7 @@ Total exports: 423
 | `killProcessGroup` | const | stable | `../lib/commands/process-group` |
 | `killProcessTree` | const | stable | `../lib/commands/process-group` |
 | `lineOf` | const | stable | `../lib/scan` |
+| `LlmProvider` | type | stable | `../lib/llm/client` |
 | `loadPlugins` | const | stable | `../plugin` |
 | `localRefHolds` | const | stable | `../lib/wip-engine/work-ref-publication` |
 | `LockContentionError` | const | stable | `../lib/shared/with-file-mutex` |
@@ -357,6 +365,7 @@ Total exports: 423
 | `resolvePluginSpecifier` | const | stable | `../plugin` |
 | `resolvePresetMembers` | const | stable | `../lib/plugins/preset-catalog` |
 | `resolvePublicToolIdentity` | const | stable | `../lib/contracts/resolvers/safe-tool-identity.resolver` |
+| `resolveTarget` | const | stable | `../lib/llm/client` |
 | `resolveTokenBudget` | const | stable | `../lib/contracts/interfaces/plugin-token-budget.interface` |
 | `resolveToolPermissions` | const | stable | `../lib/contracts/interfaces/plugin-tool-permissions.interface` |
 | `resolveWorkAgentId` | const | stable | `../lib/work-identity/resolve-work-agent.service` |
@@ -364,6 +373,7 @@ Total exports: 423
 | `resolveWorkspaceContained` | const | stable | `../lib/shared/contain-path` |
 | `resolveWorkspaceContainedEffective` | const | stable | `../lib/security/effective-containment` |
 | `resolveWorkspaceContainedLexical` | const | stable | `../lib/shared/contain-path` |
+| `retryAfterMs` | const | stable | `../lib/llm/client` |
 | `rewriteUnicodeForAgent` | const | stable | `../lib/shared/unicode-safe-text` |
 | `Role` | type | stable | `../lib/contracts/file-conventions.contract` |
 | `RoutingMode` | type | stable | `../lib/contracts/interfaces/provider-capabilities.interface` |

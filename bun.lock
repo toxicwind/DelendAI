@@ -480,8 +480,12 @@
     "plugins/code-race": {
       "name": "@delendai/code-race",
       "version": "0.1.0",
+      "bin": {
+        "delend-code-race-line": "./bin/race-line.ts",
+      },
       "dependencies": {
         "@delendai/consent": "workspace:*",
+        "@delendai/core": "workspace:*",
         "zod": "^4.4.3",
       },
       "peerDependencies": {
