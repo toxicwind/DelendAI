@@ -149,3 +149,7 @@ delendai-session-*.md
 *.sqlite.staging-wal
 *.sqlite.staging-shm
 .ffs/
+
+# Rust crates (code-race native mirror) — never track target/ build output.
+plugins/*/crates/*/target/
+crates/*/target/

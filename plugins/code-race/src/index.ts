@@ -141,7 +141,7 @@ export async function raceCore(
 	);
 	lines.push(`breach: ${origProblem}`);
 	lines.push(`borrow candidates (top ${perSource}):`);
-	for (const l of borrowLines) lines.push('  ' + l.trim());
+	for (const l of borrowLines) lines.push(`  ${l.trim()}`);
 	if (bn.stdout) {
 		const src = (bn.stdout.match(/\[([a-z_]+)\]/) || [])[1] ?? 'external';
 		const title =
@@ -182,12 +182,19 @@ export function parseArgs(args: string[]): {
 	raceTimeout: number;
 	cmdLine: string;
 } {
-	const iPer = args.indexOf('--per-source');
-	const iBudget = args.findIndex((a) => a === '--2s');
-	const iRace = args.indexOf('--race-timeout');
-	const perSource = iPer >= 0 ? Number(args[iPer + 1]) || 3 : 3;
+	// Standard `--` delimiter: everything after it is the command line, verbatim.
+	// run-fast hands the fully-quoted real command after `--` so flag-like tokens
+	// inside it (`--per-source`, `--2s`, …) are never misparsed, and a fragmented
+	// `-c` program / inline env / quoted substring survives the arg boundary.
+	const dd = args.indexOf('--');
+	const cmdArgs = dd >= 0 ? args.slice(dd + 1) : args;
+
+	const iPer = cmdArgs.indexOf('--per-source');
+	const iBudget = cmdArgs.indexOf('--2s');
+	const iRace = cmdArgs.indexOf('--race-timeout');
+	const perSource = iPer >= 0 ? Number(cmdArgs[iPer + 1]) || 3 : 3;
 	const budget = iBudget >= 0 ? 2000 : BUDGET_MS;
-	const raceTimeout = iRace >= 0 ? Number(args[iRace + 1]) || 6 : 6;
+	const raceTimeout = iRace >= 0 ? Number(cmdArgs[iRace + 1]) || 6 : 6;
 	const skip = new Set<number>();
 	if (iPer >= 0) {
 		skip.add(iPer);
@@ -198,7 +205,7 @@ export function parseArgs(args: string[]): {
 		skip.add(iRace);
 		skip.add(iRace + 1);
 	}
-	const cmdLine = args.filter((_, idx) => !skip.has(idx))[0] ?? '';
+	const cmdLine = cmdArgs.filter((_, idx) => !skip.has(idx))[0] ?? '';
 	return { perSource, budget, raceTimeout, cmdLine };
 }
 

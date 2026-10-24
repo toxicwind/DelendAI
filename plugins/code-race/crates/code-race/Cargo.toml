@@ -1,0 +1,18 @@
+[package]
+name = "delendai-code-race"
+version = "0.1.0"
+edition = "2021"
+description = "Sub-4s breach auto-racer primitive (importable): run a command under budget, fail fast, race forge on breach."
+license = "BSD-3-Clause"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lib]
+name = "delendai_code_race"
+path = "src/lib.rs"
+
+[[bin]]
+name = "delend-code-race"
+path = "src/main.rs"

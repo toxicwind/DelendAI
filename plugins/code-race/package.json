@@ -19,7 +19,18 @@
 			},
 			"types": "./src/public/index.ts",
 			"import": "./src/public/index.ts"
+		},
+		"./lib/race": {
+			"types": "./src/lib/race.ts",
+			"import": "./src/lib/race.ts"
+		},
+		"./lib/scriptRunner": {
+			"types": "./src/lib/scriptRunner.ts",
+			"import": "./src/lib/scriptRunner.ts"
 		}
+	},
+	"bin": {
+		"delend-code-race-line": "./bin/race-line.ts"
 	},
 	"peerDependencies": {
 		"@delendai/core": "^0.1.1"
