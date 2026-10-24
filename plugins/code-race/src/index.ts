@@ -5,11 +5,39 @@
  * and importable Bun library.
  */
 import { existsSync } from "node:fs";
-import { definePlugin } from "@delendai/core/plugin";
-import { consentTools } from "@delendai/consent";
+import { definePlugin } from "../../../packages/core/src/lib/plugins/plugin-contract.ts";
+import { consentTools } from "../../consent/src/index.ts";
 import { z } from "zod";
 import { autoFix, type IAutoFixResult } from "./lib/autoFix";
-import { writeFileAtomic } from "@delendai/core/runtime";
+import {
+  hodosTarget,
+  HODOS_ROUTER_MODEL,
+} from "../../../packages/core/src/lib/llm/client.ts";
+import { writeFileAtomic } from "../../../packages/core/src/lib/shared/atomic-write.ts";
+
+/** Resolve a secret name from the canonical stores (same sources the hodos
+ *  daemon's env-shim reads: ~/.secrets and config/hodos-ssot/route.env) when
+ *  the shell didn't export it. Returns the value or undefined; never prints. */
+function resolveKeyFromSecrets(name: string): string | undefined {
+  const { readFileSync, existsSync } =
+    require("node:fs") as typeof import("node:fs");
+  const home = process.env.HOME ?? "/home/toxic";
+  const candidates = [
+    `${home}/.secrets`,
+    `${home}/estate/config/hodos-ssot/route.env`,
+  ];
+  for (const path of candidates) {
+    try {
+      if (!existsSync(path)) continue;
+      const raw = readFileSync(path, "utf8");
+      const m = new RegExp(`^${name}=(.*)$`, "m").exec(raw);
+      if (m) return m[1].trim().replace(/^["']|["']$/g, "");
+    } catch {
+      // try next candidate
+    }
+  }
+  return undefined;
+}
 
 const BUDGET_MS = 4000;
 const DEFAULT_FORGE = "/home/toxic/pens/barn/forge/bin/forge.ts"; // pattern-forge (has `borrow`+`race`), canonical barn product bundle
@@ -84,7 +112,12 @@ export async function raceCore(
      *  the verified faster command — instead of relying only on external forge. */
     modelTarget?: {
       provider:
-        "openrouter" | "anthropic" | "google" | "openai" | "freeinference";
+        | "openrouter"
+        | "anthropic"
+        | "google"
+        | "openai"
+        | "freeinference"
+        | "hodos";
       model: string;
       apiKey: string;
     };
@@ -316,7 +349,22 @@ Steps:
     );
     return 2;
   }
-  const r = await raceCore(cmdLine, { perSource, budget, raceTimeout });
+  // The CLI routes the autonomous breach-fix through the estate super-provider
+  // (Hodos) so that on breach raceCore can ask the model "HOW COULD I MAKE THIS
+  // UBER FASTER" and apply the verified faster command — not just forge-borrow.
+  // Resolve the key from the canonical store (~/.secrets, same source the hodos
+  // daemon uses) when the invoking shell didn't export it — never print it.
+  const hodosKey =
+    process.env.HODOS_API_KEY ?? resolveKeyFromSecrets("HODOS_API_KEY");
+  const modelTarget = hodosKey
+    ? hodosTarget(HODOS_ROUTER_MODEL, hodosKey)
+    : undefined;
+  const r = await raceCore(cmdLine, {
+    perSource,
+    budget,
+    raceTimeout,
+    ...(modelTarget ? { modelTarget } : {}),
+  });
   for (const l of r.lines) console.log(l);
   return r.rc;
 }
