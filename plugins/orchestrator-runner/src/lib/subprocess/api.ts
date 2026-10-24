@@ -11,7 +11,7 @@
  * turns `x-ratelimit-*` / `retry-after` headers into an `httpHeaderSample`
  * the caller can hand to `writeQuotaSnapshot`.
  */
-import { rewriteUnicodeForAgent } from '@delendai/core/public';
+import { rewriteUnicodeForAgent, retryAfterMs } from '@delendai/core/public';
 
 import {
 	httpHeaderSample,
@@ -73,11 +73,16 @@ export const parseRateLimitHeaders = (
 		const n = Number(raw);
 		return Number.isFinite(n) ? n : null;
 	};
+	// Retry-After / x-ratelimit-reset parsing is owned by the shared core
+	// primitive (`@delendai/core/llm` retryAfterMs) — single source of truth
+	// for the estate's 429/limiter-shed seam. Convert the core ms to the
+	// seconds the quota sample wants. Falls back to null when nothing parses.
+	const retryMs = retryAfterMs(headers);
 	return httpHeaderSample(providerId, {
 		window,
 		limit: num('x-ratelimit-limit'),
 		remaining: num('x-ratelimit-remaining'),
-		resetSeconds: num('retry-after') ?? num('x-ratelimit-reset'),
+		resetSeconds: retryMs > 0 ? retryMs / 1000 : null,
 		now,
 	});
 };

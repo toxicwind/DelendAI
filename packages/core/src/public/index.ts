@@ -893,3 +893,21 @@ export type { IUnitAdoption } from '../lib/contracts/interfaces/unit-adoption.in
 // proposals plugin has just allocated, so the unit is named after it.
 export { adoptProposalId } from '../lib/work-units/unit-adoption.service';
 export type { IWorkflowKpis } from '../lib/contracts/interfaces/workflow-kpis.interface';
+
+// The shared LLM-completion primitive. Any plugin (code-race, iterate, audit)
+// uses this to race a slow command against a model without shelling to an
+// external CLI. 429/Retry-After aware: rate limit is a limiter shed, not failure.
+export {
+	callLlm,
+	callLlmFanOut,
+	resolveTarget,
+	retryAfterMs,
+} from '../lib/llm/client';
+export type {
+	LlmProvider,
+	IModelTarget,
+	ILlmClientOptions,
+	ILlmCallOutcome,
+	ILlmCallError,
+	ILlmCallRateLimited,
+} from '../lib/llm/client';

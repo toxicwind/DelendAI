@@ -37,6 +37,7 @@
 	},
 	"dependencies": {
 		"zod": "^4.4.3",
-		"@delendai/consent": "workspace:*"
+		"@delendai/consent": "workspace:*",
+		"@delendai/core": "workspace:*"
 	}
 }

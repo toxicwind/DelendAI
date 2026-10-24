@@ -84,6 +84,13 @@
 			},
 			"types": "./dist/node/index.d.ts",
 			"import": "./dist/node/index.js"
+		},
+		"./llm": {
+			"@delendai/source": {
+				"types": "./src/lib/llm/client.ts"
+			},
+			"import": "./dist/lib/llm/client.js",
+			"types": "./dist/lib/llm/client.d.ts"
 		}
 	},
 	"scripts": {
