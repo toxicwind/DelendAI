@@ -23,6 +23,7 @@
  */
 import {
   callLlm,
+  hodosTarget,
   retryAfterMs,
   type IModelTarget,
   type ILlmCallOutcome,
