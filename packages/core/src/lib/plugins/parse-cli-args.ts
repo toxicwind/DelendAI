@@ -1,45 +1,48 @@
-import type { IDelendaiCliArgs } from '../contracts/interfaces/cli-args.interface';
+import type { IDelendaiCliArgs } from "../contracts/interfaces/cli-args.interface";
 export type { IDelendaiCliArgs };
-import { DEFAULT_CORE_PATHS } from '../contracts/interfaces/core-paths.interface';
+import { DEFAULT_CORE_PATHS } from "../contracts/interfaces/core-paths.interface";
 import {
-	coerceSurfaceMode,
-	type IMcpToolSurfaceMode,
-} from '../contracts/interfaces/surface-mode.interface';
+  coerceSurfaceMode,
+  type IMcpToolSurfaceMode,
+} from "../contracts/interfaces/surface-mode.interface";
 import {
-	PRESET_CATALOG,
-	resolvePresetMembers,
-	type IPresetKind,
-} from './preset-catalog';
-import { resolve as resolvePath } from 'node:path';
+  PRESET_CATALOG,
+  resolvePresetMembers,
+  type IPresetKind,
+} from "./preset-catalog";
+import { resolve as resolvePath } from "node:path";
 
 export const DEFAULT_CLI_ARGS = {
-	cacheDir: DEFAULT_CORE_PATHS.cacheDir,
-	docsDir: DEFAULT_CORE_PATHS.docsDir,
-	serverName: 'DelendAI',
-	serverVersion: '0.1.0',
+  cacheDir: DEFAULT_CORE_PATHS.cacheDir,
+  docsDir: DEFAULT_CORE_PATHS.docsDir,
+  serverName: "DelendAI",
+  serverVersion: "0.1.0",
 } as const;
 
 const KNOWN_KEYS = new Set([
-	'plugins',
-	'preset',
-	'exclude-plugins',
-	'excludePlugins',
-	'cacheDir',
-	'docsDir',
-	'workspace',
-	'surface',
-	'startup-report',
-	'name',
-	'serverVersion',
-	'prefix',
-	'config',
-	'check',
-	'doctor',
-	'verbose',
-	'mcp-project-create',
-	'mcp-project-tests',
-	'agent-worktree',
-	'strict-logs',
+  "plugins",
+  "preset",
+  "exclude-plugins",
+  "excludePlugins",
+  "cacheDir",
+  "docsDir",
+  "workspace",
+  "surface",
+  "startup-report",
+  "name",
+  "serverVersion",
+  "prefix",
+  "config",
+  "check",
+  "doctor",
+  "verbose",
+  "mcp-project-create",
+  "mcp-project-tests",
+  "agent-worktree",
+  "strict-logs",
+  "port",
+  "http",
+  "wss",
 ]);
 
 /**
@@ -49,15 +52,15 @@ const KNOWN_KEYS = new Set([
  * clear parse error instead of silently collapsing to `false`.
  */
 const parseTriStateFlag = (
-	flag: string,
-	value: string | undefined,
+  flag: string,
+  value: string | undefined,
 ): boolean | undefined => {
-	if (value === undefined) return undefined;
-	if (value === 'true' || value === '1' || value === 'yes') return true;
-	if (value === 'false' || value === '0' || value === 'no') return false;
-	throw new Error(
-		`Invalid value for ${flag}: "${value}". Use ${flag}=true or ${flag}=false.`,
-	);
+  if (value === undefined) return undefined;
+  if (value === "true" || value === "1" || value === "yes") return true;
+  if (value === "false" || value === "0" || value === "no") return false;
+  throw new Error(
+    `Invalid value for ${flag}: "${value}". Use ${flag}=true or ${flag}=false.`,
+  );
 };
 
 // Curated plugin presets (additive). `--preset=standard` saves typing the
@@ -69,66 +72,73 @@ const parseTriStateFlag = (
 // break. The web page (`apps/web/src/pages/presets.astro`) and any new
 // consumer MUST read `PRESET_CATALOG` directly.
 export const PLUGIN_PRESETS: Readonly<Record<string, readonly string[]>> =
-	Object.freeze(
-		Object.fromEntries(
-			PRESET_CATALOG.map((def) => [
-				def.id,
-				resolvePresetMembers(def.id as IPresetKind),
-			]),
-		),
-	) as Readonly<Record<string, readonly string[]>>;
+  Object.freeze(
+    Object.fromEntries(
+      PRESET_CATALOG.map((def) => [
+        def.id,
+        resolvePresetMembers(def.id as IPresetKind),
+      ]),
+    ),
+  ) as Readonly<Record<string, readonly string[]>>;
 
 /** Plugins for a preset name, or `[]` when the name is unknown. */
 export const resolvePreset = (name: string | undefined): readonly string[] =>
-	resolvePresetMembers(name);
+  resolvePresetMembers(name);
 
 /** Whether the caller explicitly selected the plugin surface. */
 export const hasExplicitPluginSurfaceSelection = (
-	args: Pick<IDelendaiCliArgs, 'tokens'>,
+  args: Pick<IDelendaiCliArgs, "tokens">,
 ): boolean =>
-	args.tokens.preset !== undefined || args.tokens.plugins !== undefined;
+  args.tokens.preset !== undefined || args.tokens.plugins !== undefined;
 
 const isFalse = (value: string | undefined): boolean =>
-	value === 'false' || value === '0' || value === 'no';
+  value === "false" || value === "0" || value === "no";
 
 /** Tokenize `--key=value`, `--key value` and `--flag` into a map. */
 const tokenize = (argv: readonly string[]): Record<string, string> => {
-	const out: Record<string, string> = {};
-	for (let i = 0; i < argv.length; i += 1) {
-		const token = argv[i];
-		if (token === undefined || !token.startsWith('--')) continue;
-		const body = token.slice(2);
-		const eq = body.indexOf('=');
-		if (eq >= 0) {
-			out[body.slice(0, eq)] = body.slice(eq + 1);
-			continue;
-		}
-		const next = argv[i + 1];
-		if (next !== undefined && !next.startsWith('--')) {
-			out[body] = next;
-			i += 1;
-		} else {
-			out[body] = 'true';
-		}
-	}
-	return out;
+  const out: Record<string, string> = {};
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (token === undefined || !token.startsWith("--")) continue;
+    const body = token.slice(2);
+    const eq = body.indexOf("=");
+    if (eq >= 0) {
+      out[body.slice(0, eq)] = body.slice(eq + 1);
+      continue;
+    }
+    const next = argv[i + 1];
+    if (next !== undefined && !next.startsWith("--")) {
+      out[body] = next;
+      i += 1;
+    } else {
+      out[body] = "true";
+    }
+  }
+  return out;
 };
 
 const splitList = (value: string | undefined): string[] =>
-	value === undefined
-		? []
-		: value
-				.split(',')
-				.map((entry) => entry.trim())
-				.filter((entry) => entry.length > 0);
+  value === undefined
+    ? []
+    : value
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0);
+
+/** `--port N` → integer, or `undefined` when absent / non-port. */
+const toPort = (value: string | undefined): number | undefined => {
+  if (value === undefined) return undefined;
+  const n = Number.parseInt(value, 10);
+  return Number.isFinite(n) && n > 0 && n < 65536 ? n : undefined;
+};
 
 const parseSurfaceMode = (value: string | undefined): IMcpToolSurfaceMode => {
-	if (value === undefined) return 'managed';
-	const mode = coerceSurfaceMode(value);
-	if (mode !== undefined) return mode;
-	throw new Error(
-		`Invalid value for --surface: "${value}". Use --surface=managed, --surface=native, --surface=adaptive, or --surface=compact.`,
-	);
+  if (value === undefined) return "managed";
+  const mode = coerceSurfaceMode(value);
+  if (mode !== undefined) return mode;
+  throw new Error(
+    `Invalid value for --surface: "${value}". Use --surface=managed, --surface=native, --surface=adaptive, or --surface=compact.`,
+  );
 };
 
 /**
@@ -138,51 +148,53 @@ const parseSurfaceMode = (value: string | undefined): IMcpToolSurfaceMode => {
  * `--proposalsDir` without the core knowing about it.
  */
 export const parseCliArgs = (
-	argv: readonly string[],
-	cwd: string,
+  argv: readonly string[],
+  cwd: string,
 ): IDelendaiCliArgs => {
-	const tokens = tokenize(argv);
-	const extra: Record<string, string> = {};
-	for (const [key, value] of Object.entries(tokens)) {
-		if (!KNOWN_KEYS.has(key)) extra[key] = value;
-	}
-	// Preset plugins first, then explicit --plugins; de-duped, order preserved.
-	// `--exclude-plugins` is subtracted AFTER the merge, so the user can
-	// strip a plugin from a preset (`--preset=swarm --exclude-plugins=notification`)
-	// or drop an explicit one they don't want.
-	const exclude = new Set([
-		...splitList(tokens['exclude-plugins']),
-		...splitList(tokens.excludePlugins),
-	]);
-	const presetPlugins = resolvePreset(tokens.preset).filter(
-		(name) => !exclude.has(name),
-	);
-	const flagPlugins = splitList(tokens.plugins).filter(
-		(name) => !exclude.has(name),
-	);
-	const plugins = [...new Set([...presetPlugins, ...flagPlugins])];
-	return {
-		plugins,
-		presetPlugins,
-		flagPlugins,
-		excludePlugins: [...exclude],
-		cacheDir: tokens.cacheDir ?? DEFAULT_CLI_ARGS.cacheDir,
-		docsDir: tokens.docsDir ?? DEFAULT_CLI_ARGS.docsDir,
-		workspace: resolvePath(cwd, tokens.workspace ?? '.'),
-		surfaceMode: parseSurfaceMode(tokens.surface),
-		startupReportLevel: tokens['startup-report'],
-		serverName: tokens.name ?? DEFAULT_CLI_ARGS.serverName,
-		serverVersion: tokens.serverVersion ?? DEFAULT_CLI_ARGS.serverVersion,
-		namespacePrefix: tokens.prefix,
-		configPath: tokens.config,
-		mcpProjectCreate: !isFalse(tokens['mcp-project-create']),
-		mcpProjectTests: !isFalse(tokens['mcp-project-tests']),
-		agentWorktree: parseTriStateFlag(
-			'--agent-worktree',
-			tokens['agent-worktree'],
-		),
-		strictLogs: parseTriStateFlag('--strict-logs', tokens['strict-logs']),
-		extra,
-		tokens,
-	};
+  const tokens = tokenize(argv);
+  const extra: Record<string, string> = {};
+  for (const [key, value] of Object.entries(tokens)) {
+    if (!KNOWN_KEYS.has(key)) extra[key] = value;
+  }
+  // Preset plugins first, then explicit --plugins; de-duped, order preserved.
+  // `--exclude-plugins` is subtracted AFTER the merge, so the user can
+  // strip a plugin from a preset (`--preset=swarm --exclude-plugins=notification`)
+  // or drop an explicit one they don't want.
+  const exclude = new Set([
+    ...splitList(tokens["exclude-plugins"]),
+    ...splitList(tokens.excludePlugins),
+  ]);
+  const presetPlugins = resolvePreset(tokens.preset).filter(
+    (name) => !exclude.has(name),
+  );
+  const flagPlugins = splitList(tokens.plugins).filter(
+    (name) => !exclude.has(name),
+  );
+  const plugins = [...new Set([...presetPlugins, ...flagPlugins])];
+  return {
+    plugins,
+    presetPlugins,
+    flagPlugins,
+    excludePlugins: [...exclude],
+    cacheDir: tokens.cacheDir ?? DEFAULT_CLI_ARGS.cacheDir,
+    docsDir: tokens.docsDir ?? DEFAULT_CLI_ARGS.docsDir,
+    workspace: resolvePath(cwd, tokens.workspace ?? "."),
+    surfaceMode: parseSurfaceMode(tokens.surface),
+    startupReportLevel: tokens["startup-report"],
+    serverName: tokens.name ?? DEFAULT_CLI_ARGS.serverName,
+    serverVersion: tokens.serverVersion ?? DEFAULT_CLI_ARGS.serverVersion,
+    namespacePrefix: tokens.prefix,
+    configPath: tokens.config,
+    mcpProjectCreate: !isFalse(tokens["mcp-project-create"]),
+    mcpProjectTests: !isFalse(tokens["mcp-project-tests"]),
+    agentWorktree: parseTriStateFlag(
+      "--agent-worktree",
+      tokens["agent-worktree"],
+    ),
+    strictLogs: parseTriStateFlag("--strict-logs", tokens["strict-logs"]),
+    port: toPort(tokens.port),
+    http: tokens.http === "true" || tokens.wss === "true",
+    extra,
+    tokens,
+  };
 };

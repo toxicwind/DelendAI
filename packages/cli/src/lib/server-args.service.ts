@@ -37,56 +37,54 @@
  *     caller-supplied plugins into `--plugins`.
  */
 
-import type { ICliGlobalOptions } from '../contracts/interfaces/cli-command.interface';
+import type { ICliGlobalOptions } from "../contracts/interfaces/cli-command.interface";
 import {
-	CANONICAL_CLI_BIN,
-	CANONICAL_CLI_PACKAGE,
-} from '../contracts/constants/canonical-launch.constant';
+  CANONICAL_CLI_BIN,
+  CANONICAL_CLI_PACKAGE,
+} from "../contracts/constants/canonical-launch.constant";
 import type {
-	ICanonicalLaunch,
-	ICanonicalLaunchOptions,
-} from '../contracts/interfaces/canonical-launch.interface';
-import type { IAutoForwardRule } from '../contracts/interfaces/server-args.interface';
+  ICanonicalLaunch,
+  ICanonicalLaunchOptions,
+} from "../contracts/interfaces/canonical-launch.interface";
+import type { IAutoForwardRule } from "../contracts/interfaces/server-args.interface";
 
 // f00037/f00093: canonical home is contracts/interfaces/server-args.interface.ts.
 // Re-exported here for the spec that imports the rule type from this module.
-export type { IAutoForwardRule } from '../contracts/interfaces/server-args.interface';
+export type { IAutoForwardRule } from "../contracts/interfaces/server-args.interface";
 
 /** Discriminator for the shape of a forwarding rule. */
 
 const option = (key: keyof ICliGlobalOptions): IAutoForwardRule => ({
-	key,
-	kind: 'option',
-	argv: (k, value) =>
-		value === undefined || value === '' ? [] : [`--${k}`, String(value)],
+  key,
+  kind: "option",
+  argv: (k, value) =>
+    value === undefined || value === "" ? [] : [`--${k}`, String(value)],
 });
 
 const namedOption = (
-	key: keyof ICliGlobalOptions,
-	flagName: string,
+  key: keyof ICliGlobalOptions,
+  flagName: string,
 ): IAutoForwardRule => ({
-	key,
-	kind: 'option',
-	argv: (_k, value) =>
-		value === undefined || value === ''
-			? []
-			: [`--${flagName}`, String(value)],
+  key,
+  kind: "option",
+  argv: (_k, value) =>
+    value === undefined || value === "" ? [] : [`--${flagName}`, String(value)],
 });
 
 const repeatable = (key: keyof ICliGlobalOptions): IAutoForwardRule => ({
-	key,
-	kind: 'repeatable',
-	argv: (k, value) => {
-		if (!Array.isArray(value) || value.length === 0) return [];
-		const joined = [...new Set(value.map(String))].join(',');
-		return joined === '' ? [] : [`--${k}`, joined];
-	},
+  key,
+  kind: "repeatable",
+  argv: (k, value) => {
+    if (!Array.isArray(value) || value.length === 0) return [];
+    const joined = [...new Set(value.map(String))].join(",");
+    return joined === "" ? [] : [`--${k}`, joined];
+  },
 });
 
 const flag = (key: keyof ICliGlobalOptions): IAutoForwardRule => ({
-	key,
-	kind: 'flag',
-	argv: (k, value) => (value === true ? [`--${k}`] : []),
+  key,
+  kind: "flag",
+  argv: (k, value) => (value === true ? [`--${k}`] : []),
 });
 
 /**
@@ -97,27 +95,23 @@ const flag = (key: keyof ICliGlobalOptions): IAutoForwardRule => ({
  * have to guess whether absence means "off" or "unset".
  */
 const triStateFlag = (
-	key: keyof ICliGlobalOptions,
-	flagName: string,
+  key: keyof ICliGlobalOptions,
+  flagName: string,
 ): IAutoForwardRule => ({
-	key,
-	kind: 'flag',
-	argv: (_k, value) => {
-		if (value === true) return [`--${flagName}`];
-		if (value === false) return [`--${flagName}=false`];
-		return [];
-	},
+  key,
+  kind: "flag",
+  argv: (_k, value) => {
+    if (value === true) return [`--${flagName}`];
+    if (value === false) return [`--${flagName}=false`];
+    return [];
+  },
 });
 
 const passthrough = (key: keyof ICliGlobalOptions): IAutoForwardRule => ({
-	key,
-	kind: 'passthrough',
-	argv: (_k, value) =>
-		Array.isArray(value)
-			? value.map(String)
-			: value === undefined
-				? []
-				: [],
+  key,
+  kind: "passthrough",
+  argv: (_k, value) =>
+    Array.isArray(value) ? value.map(String) : value === undefined ? [] : [],
 });
 
 /**
@@ -125,24 +119,24 @@ const passthrough = (key: keyof ICliGlobalOptions): IAutoForwardRule => ({
  * testable and a reviewer can reason about one concern at a time.
  */
 const IDENTITY_RULES: readonly IAutoForwardRule[] = [
-	option('config'),
-	namedOption('serverName', 'name'),
+  option("config"),
+  namedOption("serverName", "name"),
 ];
 
 const PLUGIN_RULES: readonly IAutoForwardRule[] = [
-	option('preset'),
-	repeatable('plugins'),
-	repeatable('excludePlugins'),
+  option("preset"),
+  repeatable("plugins"),
+  repeatable("excludePlugins"),
 ];
 
 const OBSERVABILITY_RULES: readonly IAutoForwardRule[] = [
-	option('cacheDir'),
-	option('docsDir'),
+  option("cacheDir"),
+  option("docsDir"),
 ];
 
 const BOOTSTRAP_RULES: readonly IAutoForwardRule[] = [
-	flag('mcpProjectCreate'),
-	flag('mcpProjectTests'),
+  flag("mcpProjectCreate"),
+  flag("mcpProjectTests"),
 ];
 
 /**
@@ -150,7 +144,18 @@ const BOOTSTRAP_RULES: readonly IAutoForwardRule[] = [
  * delendai flag forwards an explicit `--agent-worktree[=false]` to the host.
  */
 const CAPABILITY_RULES: readonly IAutoForwardRule[] = [
-	triStateFlag('agentWorktree', 'agent-worktree'),
+  triStateFlag("agentWorktree", "agent-worktree"),
+];
+
+/**
+ * f00053: fast http→wss MCP transport. `--port N` selects the bind port and
+ * `--http` (a.k.a. `--wss`) opts the server into the WebSocket transport
+ * instead of stdio. Both are optional; --http without --port uses the
+ * default loopback port.
+ */
+const SERVER_TRANSPORT_RULES: readonly IAutoForwardRule[] = [
+  option("port"),
+  flag("http"),
 ];
 
 /**
@@ -161,11 +166,12 @@ const CAPABILITY_RULES: readonly IAutoForwardRule[] = [
  * significant — the consumer walks it once.
  */
 export const SERVER_ARG_MAPPER: readonly IAutoForwardRule[] = [
-	...IDENTITY_RULES,
-	...PLUGIN_RULES,
-	...OBSERVABILITY_RULES,
-	...BOOTSTRAP_RULES,
-	...CAPABILITY_RULES,
+  ...IDENTITY_RULES,
+  ...PLUGIN_RULES,
+  ...OBSERVABILITY_RULES,
+  ...BOOTSTRAP_RULES,
+  ...CAPABILITY_RULES,
+  ...SERVER_TRANSPORT_RULES,
 ];
 
 // Re-export the escape-hatch builder so hosts can register a
@@ -173,37 +179,37 @@ export const SERVER_ARG_MAPPER: readonly IAutoForwardRule[] = [
 export { passthrough as passthroughRule };
 
 const forwardAll = (
-	globals: ICliGlobalOptions,
-	excluded: ReadonlySet<keyof ICliGlobalOptions> = new Set(),
+  globals: ICliGlobalOptions,
+  excluded: ReadonlySet<keyof ICliGlobalOptions> = new Set(),
 ): readonly string[] => {
-	const out: string[] = [];
-	for (const rule of SERVER_ARG_MAPPER) {
-		if (excluded.has(rule.key)) continue;
-		const value = globals[rule.key];
-		out.push(...rule.argv(String(rule.key), value));
-	}
-	return out;
+  const out: string[] = [];
+  for (const rule of SERVER_ARG_MAPPER) {
+    if (excluded.has(rule.key)) continue;
+    const value = globals[rule.key];
+    out.push(...rule.argv(String(rule.key), value));
+  }
+  return out;
 };
 
 export const buildServerArgs = (
-	globals: ICliGlobalOptions,
-	extraPlugins: readonly string[] = [],
+  globals: ICliGlobalOptions,
+  extraPlugins: readonly string[] = [],
 ): string[] => {
-	const args: string[] = ['__serve', '--workspace', globals.workspace];
-	// Plugins are merged exactly once below with caller-supplied extras.
-	args.push(...forwardAll(globals, new Set(['plugins'])));
+  const args: string[] = ["__serve", "--workspace", globals.workspace];
+  // Plugins are merged exactly once below with caller-supplied extras.
+  args.push(...forwardAll(globals, new Set(["plugins"])));
 
-	// `--plugins` is the only field where `extraPlugins` from the caller
-	// participates. We keep this final merge local so the mapper rule does
-	// not need to know about caller-supplied extras.
-	const allPlugins = [
-		...new Set([
-			...(Array.isArray(globals.plugins) ? globals.plugins : []),
-			...extraPlugins,
-		]),
-	];
-	if (allPlugins.length > 0) args.push('--plugins', allPlugins.join(','));
-	return args;
+  // `--plugins` is the only field where `extraPlugins` from the caller
+  // participates. We keep this final merge local so the mapper rule does
+  // not need to know about caller-supplied extras.
+  const allPlugins = [
+    ...new Set([
+      ...(Array.isArray(globals.plugins) ? globals.plugins : []),
+      ...extraPlugins,
+    ]),
+  ];
+  if (allPlugins.length > 0) args.push("--plugins", allPlugins.join(","));
+  return args;
 };
 
 /**
@@ -211,28 +217,28 @@ export const buildServerArgs = (
  * package; the repository-only host script is never part of this result.
  */
 export const buildCanonicalLaunch = (
-	options: ICanonicalLaunchOptions,
+  options: ICanonicalLaunchOptions,
 ): ICanonicalLaunch => {
-	const command = options.mode ?? 'bunx';
-	const serverArgs = buildServerArgs({
-		workspace: options.workspace,
-		json: false,
-		format: 'text',
-		lang: 'en',
-		noColor: false,
-		plugins: options.plugins ?? [],
-		...(options.serverName !== undefined
-			? { serverName: options.serverName }
-			: {}),
-		...(options.preset !== undefined ? { preset: options.preset } : {}),
-	});
-	return {
-		command,
-		args: [
-			'--package',
-			CANONICAL_CLI_PACKAGE,
-			CANONICAL_CLI_BIN,
-			...serverArgs,
-		],
-	};
+  const command = options.mode ?? "bunx";
+  const serverArgs = buildServerArgs({
+    workspace: options.workspace,
+    json: false,
+    format: "text",
+    lang: "en",
+    noColor: false,
+    plugins: options.plugins ?? [],
+    ...(options.serverName !== undefined
+      ? { serverName: options.serverName }
+      : {}),
+    ...(options.preset !== undefined ? { preset: options.preset } : {}),
+  });
+  return {
+    command,
+    args: [
+      "--package",
+      CANONICAL_CLI_PACKAGE,
+      CANONICAL_CLI_BIN,
+      ...serverArgs,
+    ],
+  };
 };
