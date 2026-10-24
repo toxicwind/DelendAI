@@ -26,11 +26,24 @@ export type LlmProvider =
  *  router. OpenAI-compatible; key via HODOS_API_KEY. This is the fleet's model
  *  ENTRY — every completion (code-race autoFix, plugins) routes through it. */
 export const HODOS_BASE_URL = "http://127.0.0.1:25193/v1";
-export const HODOS_ROUTER_MODEL = "nvidia/nemotron-3-ultra-550b-a55b";
+/** Default routed model: Nemotron 3.5 Super VL — agentic/coding reasoning with
+ *  tool calling on the free lane. */
+export const HODOS_ROUTER_MODEL = "nvidia/nemotron-3.5-super-vl-120b-a12b";
+/** Ordered fallback models — every one VERIFIED to complete through :25193.
+ *  The racer walks the WHOLE list when a model is unavailable upstream
+ *  (502/404), so one dead lane can never disable the autonomous fix.
+ *  "Target them all." */
 export const HODOS_FALLBACK_MODELS = [
-  "nvidia/nemotron-3-super-120b-a12b",
-  "nvidia/nemotron-3-nano-30b-a3b",
+  "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+  "openai/gpt-oss-20b",
+  "stepfun-ai/step-5-preview",
+  "nvidia/nemotron-3-ultra-550b-a55b:free",
 ];
+
+/** HTTP statuses that mean "this model lane is unavailable right now" — the
+ *  call is worth retrying on the NEXT model, not a hard failure. */
+const UPSTREAM_UNAVAILABLE = new Set([404, 502, 503, 504]);
 
 export interface IModelTarget {
   readonly provider: LlmProvider;
@@ -301,77 +314,129 @@ export const callLlm = async (
   const systemPrompt = options.systemPrompt ?? DEFAULT_SYSTEM_PROMPT;
   const transport = options.transport ?? defaultTransport;
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  const resolved = resolveTarget(target, brief, systemPrompt);
-  try {
-    const { status, json, headers } = await transport.fetchJson(resolved.url, {
-      method: "POST",
-      headers: { ...resolved.headers },
-      body: resolved.body,
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
+  // Target them all: for the hodos super-provider, walk the primary model
+  // then every fallback on "this lane is unavailable" (404/502/503/504 or a
+  // transport abort). 429 is NEVER retried — that's a limiter shed to honor,
+  // not a dead lane. Endpoints like anthropic/google don't fall back (their
+  // own models are explicit) — only hodos gets the walk.
+  const modelChain =
+    target.provider === "hodos"
+      ? [
+          target.model,
+          ...HODOS_FALLBACK_MODELS.filter((m) => m !== target.model),
+        ]
+      : [target.model];
 
-    // 429 = limiter shed, not provider failure. Surface a retryable outcome
-    // with the suggested wait so callers honor Retry-After and retry.
-    if (status === 429) {
-      const waitMs = retryAfterMs(headers);
-      const safe = redactSecrets(
-        typeof json === "string" ? json : JSON.stringify(json),
+  const attempt = async (
+    modelId: string,
+  ): Promise<
+    | { status: "ok"; outcome: ILlmCallOutcome }
+    | { status: "retryable" }
+    | { status: "final"; outcome: ILlmCallOutcome }
+  > => {
+    const attemptStart = Date.now();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const resolved = resolveTarget(
+      { ...target, model: modelId },
+      brief,
+      systemPrompt,
+    );
+    let outcome: ILlmCallOutcome;
+    try {
+      const { status, json, headers } = await transport.fetchJson(
+        resolved.url,
+        {
+          method: "POST",
+          headers: { ...resolved.headers },
+          body: resolved.body,
+          signal: controller.signal,
+        },
       );
-      return {
-        ok: false,
-        kind: "rate_limited",
+      clearTimeout(timer);
+      if (status === 429) {
+        const waitMs = retryAfterMs(headers);
+        const safe = redactSecrets(
+          typeof json === "string" ? json : JSON.stringify(json),
+        );
+        outcome = {
+          ok: false,
+          kind: "rate_limited",
+          target,
+          elapsedMs: Date.now() - attemptStart,
+          error: `provider ${target.provider} rate-limited (HTTP 429): ${safe.text.slice(0, 300)}`,
+          retryAfterMs: waitMs,
+        };
+        return { status: "final", outcome }; // 429 = shed, never fall through
+      }
+      if (status < 200 || status >= 300) {
+        const safe = redactSecrets(
+          typeof json === "string" ? json : JSON.stringify(json),
+        );
+        if (UPSTREAM_UNAVAILABLE.has(status)) return { status: "retryable" };
+        outcome = {
+          ok: false,
+          kind: "error",
+          target,
+          elapsedMs: Date.now() - attemptStart,
+          error: `provider ${target.provider} returned HTTP ${status}: ${safe.text.slice(0, 500)}`,
+        };
+        return { status: "final", outcome };
+      }
+      const markdown = extractMarkdown(target.provider, json);
+      if (markdown === null || markdown.length === 0) {
+        outcome = {
+          ok: false,
+          kind: "error",
+          target,
+          elapsedMs: Date.now() - attemptStart,
+          error: `provider ${target.provider} returned an empty or unrecognised response envelope`,
+        };
+        return { status: "final", outcome };
+      }
+      const truncated = markdown.length > maxBytes;
+      const finalMarkdown = truncated
+        ? `${markdown.slice(0, maxBytes)}\n\n<!-- truncated at ${maxBytes} bytes -->`
+        : markdown;
+      outcome = {
+        ok: true,
         target,
-        elapsedMs: Date.now() - start,
-        error: `provider ${target.provider} rate-limited (HTTP 429): ${safe.text.slice(0, 300)}`,
-        retryAfterMs: waitMs,
+        elapsedMs: Date.now() - attemptStart,
+        markdown: finalMarkdown,
       };
-    }
-    if (status < 200 || status >= 300) {
-      const safe = redactSecrets(
-        typeof json === "string" ? json : JSON.stringify(json),
-      );
-      return {
+      return { status: "ok", outcome };
+    } catch (err) {
+      clearTimeout(timer);
+      const message = err instanceof Error ? err.message : "unknown error";
+      // transport abort / network error on a model lane -> try the next fallback
+      outcome = {
         ok: false,
         kind: "error",
         target,
-        elapsedMs: Date.now() - start,
-        error: `provider ${target.provider} returned HTTP ${status}: ${safe.text.slice(0, 500)}`,
+        elapsedMs: Date.now() - attemptStart,
+        error: redactSecrets(message).text,
       };
+      return modelChain.length > 1
+        ? { status: "retryable" }
+        : { status: "final", outcome };
     }
-    const markdown = extractMarkdown(target.provider, json);
-    if (markdown === null || markdown.length === 0) {
-      return {
-        ok: false,
-        kind: "error",
-        target,
-        elapsedMs: Date.now() - start,
-        error: `provider ${target.provider} returned an empty or unrecognised response envelope`,
-      };
+  };
+
+  for (let i = 0; i < modelChain.length; i++) {
+    const attemptResult = await attempt(modelChain[i]!);
+    if (attemptResult.status === "ok" || attemptResult.status === "final") {
+      return attemptResult.outcome;
     }
-    const truncated = markdown.length > maxBytes;
-    const finalMarkdown = truncated
-      ? `${markdown.slice(0, maxBytes)}\n\n<!-- truncated at ${maxBytes} bytes -->`
-      : markdown;
-    return {
-      ok: true,
-      target,
-      elapsedMs: Date.now() - start,
-      markdown: finalMarkdown,
-    };
-  } catch (err) {
-    clearTimeout(timer);
-    const message = err instanceof Error ? err.message : "unknown error";
-    return {
-      ok: false,
-      kind: "error",
-      target,
-      elapsedMs: Date.now() - start,
-      error: redactSecrets(message).text,
-    };
+    // retryable: fall through to the next model in the chain
   }
+  // exhausted every model — synthesize an honest upstream-unavailable error
+  return {
+    ok: false,
+    kind: "error",
+    target,
+    elapsedMs: Date.now() - start,
+    error: `all hodos models unavailable upstream (${modelChain.join(", ")})`,
+  };
 };
 
 export const callLlmFanOut = async (

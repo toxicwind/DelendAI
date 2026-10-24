@@ -19,9 +19,29 @@ import { writeFileAtomic } from "../../../packages/core/src/lib/shared/atomic-wr
  *  daemon's env-shim reads: ~/.secrets and config/hodos-ssot/route.env) when
  *  the shell didn't export it. Returns the value or undefined; never prints. */
 function resolveKeyFromSecrets(name: string): string | undefined {
+  const { execFileSync } =
+    require("node:child_process") as typeof import("node:child_process");
   const { readFileSync, existsSync } =
     require("node:fs") as typeof import("node:fs");
   const home = process.env.HOME ?? "/home/toxic";
+  // Authoritative store first: secretsmith (estate Secret-Service keyring).
+  // `secretsmith get --attr service=hodos --show` prints `secret: <value>`;
+  // parse that line. Never print the value.
+  try {
+    const out = execFileSync(
+      "secretsmith",
+      ["get", "--attr", "service=hodos", "--show"],
+      {
+        encoding: "utf8",
+        timeout: 5000,
+        env: { ...process.env, GH_TOKEN: "", GITHUB_TOKEN: "" },
+      },
+    );
+    const m = /^secret:\s*(.*)$/m.exec(out);
+    if (m && m[1] && m[1].trim()) return m[1].trim();
+  } catch {
+    // fall through to ~/.secrets / hodos-ssot
+  }
   const candidates = [
     `${home}/.secrets`,
     `${home}/estate/config/hodos-ssot/route.env`,
@@ -31,7 +51,7 @@ function resolveKeyFromSecrets(name: string): string | undefined {
       if (!existsSync(path)) continue;
       const raw = readFileSync(path, "utf8");
       const m = new RegExp(`^${name}=(.*)$`, "m").exec(raw);
-      if (m) return m[1].trim().replace(/^["']|["']$/g, "");
+      if (m && m[1]) return m[1].trim().replace(/^["']|["']$/g, "");
     } catch {
       // try next candidate
     }
