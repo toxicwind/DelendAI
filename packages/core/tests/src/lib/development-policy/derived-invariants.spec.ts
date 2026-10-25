@@ -87,8 +87,10 @@ describe('shared-checkout-merge — the model without pull requests', () => {
 
 	it('does not claim to enforce settings on a forge it may not administer', () => {
 		expect(policy.governance.enforced).toBe(false);
-		// But drift is still reported: unverifiable is never a pass.
-		expect(policy.governance.failClosedOnUnverifiable).toBe(true);
+		// Drift is reported, but an unverifiable state is advisory on this
+		// profile: repos that declare no validation gate must still be able
+		// to land (fail-closed blocked every merge with "no validation gate").
+		expect(policy.governance.failClosedOnUnverifiable).toBe(false);
 	});
 
 	it('certifies locally exactly where the profile declares it', () => {

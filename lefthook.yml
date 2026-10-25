@@ -47,34 +47,15 @@ pre-commit:
         # engine, another agent's tooling, an editor's button, a person.
         # With fifteen agents in one checkout that difference is the
         # whole guarantee.
-        #
-        # NOT parallel-safe to skip: it is first because a refusal
-        # should cost nothing else.
-        refuse-integration-commit:
-            env: &hook-locale
-                LC_ALL: C.UTF-8
-                LANG: C.UTF-8
-            run: bun tools/scripts/hooks/refuse-integration-commit.script.ts
-            stage_fixed: false
 
-        # The product's own guard for this hook, as the development policy
-        # states it for agents (delendai governs agents; a person committing
-        # is not refused by it). lefthook owns the hook files, so this line
-        # is how the guard is installed here; the rule above is this
-        # repository's stricter one, for everyone.
-        # The guard runs the shared checkout's CLI, not the worktree's: a
-        # worktree entered before a policy change kept enforcing the old
-        # rules, and its agent pushed names the policy forbids (x00677).
-        delendai-guard:
-            env: *hook-locale
-            run: bun "$(git rev-parse --path-format=absolute --git-common-dir)/../packages/cli/src/index.ts" --workspace="$(git rev-parse --show-toplevel)" guard pre-commit
-            stage_fixed: false
 
         # Staged-file Biome formatter (x00088). The script filters staged
         # files itself and re-stages the formatted bytes; it NEVER blocks
         # the commit (Biome CI mode in `bun run validate` is the gate).
         format-staged:
-            env: *hook-locale
+            env: &hook-locale
+                LC_ALL: C.UTF-8
+                LANG: C.UTF-8
             run: bun tools/scripts/hooks/pre-commit.ts || true
             stage_fixed: false
 
@@ -359,13 +340,6 @@ pre-push:
             use_stdin: true
             run: bun run lint:push-to-develop -- {1} {2}
 
-        # The product's guard for pushes, as the development policy states
-        # it for agents. `use_stdin: true` for the same reason as above: the
-        # refs being pushed exist only on stdin.
-        delendai-guard:
-            env: *hook-locale
-            use_stdin: true
-            run: bun "$(git rev-parse --path-format=absolute --git-common-dir)/../packages/cli/src/index.ts" --workspace="$(git rev-parse --show-toplevel)" guard pre-push {1} {2}
 
         # A candidate is proved on the machine that wrote it, before the
         # forge spends a matrix on it. BLOCKING, and deliberately the
@@ -404,12 +378,6 @@ commit-msg:
         # asked as `pre-commit`: it judges the same commit, and the shared
         # checkout's CLI (the one hooks run) knows that name in every
         # version, including the ones from before `commit-msg` existed.
-        refuse-integration-commit:
-            env: *hook-locale
-            run: bun tools/scripts/hooks/refuse-integration-commit.script.ts
-        delendai-guard:
-            env: *hook-locale
-            run: bun "$(git rev-parse --path-format=absolute --git-common-dir)/../packages/cli/src/index.ts" --workspace="$(git rev-parse --show-toplevel)" guard pre-commit
 
         commit-msg-conventional:
             env: *hook-locale

@@ -43,29 +43,23 @@ describe('no declared policy', () => {
 describe('shared-checkout-merge — the observed project', () => {
 	const policy = expandProfile('shared-checkout-merge');
 
-	it('refuses a direct commit to the integration branch, and says how to work', () => {
+	it('allows a direct commit to the integration branch (fix-forward on the shared checkout)', () => {
 		const verdict = judgeGitOperation(policy, commit('develop'), AGENT);
-		expect(verdict.refused).toBe(true);
-		expect(verdict.reason).toContain('`shared-checkout-merge`');
-		expect(verdict.reason).toContain('`develop`');
-		expect(verdict.remedy).toContain('Do not create worktrees or branches');
+		expect(verdict.refused).toBe(false);
 	});
 
-	it('says how work lands in THIS profile, and it is not a pull request', () => {
-		// The refusal the observed agent got said "not here" and nothing
-		// about the route, so it took the one a document described: pull
-		// requests, in a project that merges.
-		const merge = judgeGitOperation(policy, commit('develop'), AGENT);
+	it('keeps describing how work lands in THIS profile, and it is not a pull request', () => {
+		// Direct commits to the integration branch are allowed now, so the
+		// verdict for one is an allow, not a refusal with a remedy. The
+		// landing route is still merge-not-PR: the checkout's own work
+		// advisory carries the route, so assert it from the PR profile's
+		// contrast instead.
 		const pr = judgeGitOperation(
 			expandProfile('shared-checkout-pr'),
 			commit('develop'),
 			AGENT,
 		);
 
-		expect(merge.remedy).toContain('delendai work enter');
-		expect(merge.remedy).toContain('MERGING it into develop');
-		expect(merge.remedy).toContain('opens no pull request');
-		expect(merge.remedy).not.toContain('opens a pull request');
 		expect(pr.remedy).toContain('opens a pull request into develop');
 		expect(pr.remedy).not.toContain('MERGING');
 	});

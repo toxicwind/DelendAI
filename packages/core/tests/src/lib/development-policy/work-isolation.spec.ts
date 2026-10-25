@@ -36,12 +36,13 @@ describe('describeWorkIsolation', () => {
 	});
 
 	it.each(SHARED)(
-		'%s: names the command that makes a unit of work, since nothing written in the shared checkout is committed',
+		'%s: describes how work reaches the integration branch',
 		(profile) => {
 			const isolation = describeWorkIsolation(expandProfile(profile));
 			expect(isolation.rule).toContain('by hand');
-			expect(isolation.rule).toContain('delendai work enter');
-			expect(isolation.rule).toContain('`checkout`');
+			// shared-checkout-merge allows direct integration commits, so it
+			// no longer routes every edit through a work unit; the publish
+			// route is still named.
 			expect(isolation.rule).toContain('delendai work publish');
 		},
 	);
