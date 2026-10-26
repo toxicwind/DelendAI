@@ -21,6 +21,11 @@ import {
 	parsePrePushStdin,
 	type IPrePushRefUpdate,
 } from './push-to-develop-discipline.script';
+import {
+	describeReleaseGateConfig,
+	resolveReleaseGateConfig,
+	type IReleaseGateConfig,
+} from './lib/release-gate-config.lib';
 
 export const RELEASE_PREFIX = 'release/';
 export const MAIN = 'main';
@@ -32,12 +37,22 @@ export interface IReleaseGateOptions {
 	readonly readLastCommit?: () => string | null;
 	readonly runStep?: (label: 'typecheck' | 'lint') => number;
 	readonly nowISO?: () => string;
+	/**
+	 * Which steps the gate runs. Resolved from the CLI flag, then the project's
+	 * `development.releaseGate` config, then the default (both on). A step
+	 * declared off is reported, never silent.
+	 */
+	readonly steps?: IReleaseGateConfig;
+	/** Repo root used to resolve the project config. */
+	readonly cwd?: string;
 }
 
 export interface IReleaseGateDecision {
 	readonly ok: boolean;
 	readonly blockers: readonly string[];
 	readonly inspectedRefs: readonly string[];
+	/** Which steps the gate ran (and which were declared off). */
+	readonly steps?: IReleaseGateConfig;
 }
 
 const stripRefs = (ref: string): string =>
@@ -129,7 +144,10 @@ export const decideReleaseGate = (
 
 	const runStep = options.runStep ?? defaultRunStep;
 	const blockers: string[] = [];
+	const steps = options.steps ?? { typecheck: true, lint: true };
 	for (const label of ['typecheck', 'lint'] as const) {
+		// A step the project declared off does not run and does not block.
+		if (!steps[label]) continue;
 		const status = runStep(label);
 		if (status !== 0) {
 			blockers.push(...stepFailureBlockers(label, status));
@@ -146,13 +164,21 @@ export const decideReleaseGate = (
 	};
 };
 
-const formatReport = (decision: IReleaseGateDecision): string => {
+const formatReport = (
+	decision: IReleaseGateDecision,
+	steps?: IReleaseGateConfig,
+): string => {
+	const summary = steps ? ` · ${describeReleaseGateConfig(steps)}` : '';
 	if (decision.ok) {
-		return `✓ release-pr-gate: ok (${decision.inspectedRefs.length} ref(s))\n`;
+		return `✓ release-pr-gate: ok (${decision.inspectedRefs.length} ref(s))${summary}\n`;
 	}
-	return ['✗ release-pr-gate: blocked', '', ...decision.blockers, ''].join(
-		'\n',
-	);
+	return [
+		'✗ release-pr-gate: blocked',
+		...(summary ? [summary] : []),
+		'',
+		...decision.blockers,
+		'',
+	].join('\n');
 };
 
 export const main = async (
@@ -167,11 +193,15 @@ export const main = async (
 	const lastCommit = options.readLastCommit
 		? options.readLastCommit()
 		: readLastCommitMessage(process.cwd());
+	const steps =
+		options.steps ??
+		resolveReleaseGateConfig({ cwd: options.cwd ?? process.cwd() });
 	const decision = decideReleaseGate(updates, lastCommit, {
 		...(options.runStep ? { runStep: options.runStep } : {}),
 		...(options.nowISO ? { nowISO: options.nowISO } : {}),
+		steps,
 	});
-	const report = formatReport(decision);
+	const report = formatReport(decision, steps);
 	if (decision.ok) {
 		process.stdout.write(report);
 		return 0;
